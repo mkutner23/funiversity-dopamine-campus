@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import Battle from "./Battle";
 import {
   ArrowRight, BookOpen, Bot, Brain, Clapperboard, Flag, Gamepad2,
-  Globe2, Heart, Lightbulb, Palette, Search, Sparkles, Trophy, Users, Zap
+  Globe2, GraduationCap, Heart, Lightbulb, Palette, Search, Sparkles, Trophy, Users, X, Zap
 } from "lucide-react";
 
 const leftSubjects = ["FILM", "COMEDY", "MUSIC", "SHAKESPEARE", "DESIGN", "STORYTELLING", "IMPROV"];
@@ -18,6 +18,8 @@ function App() {
   const [major, setMajor] = useState<[string, string]>(["FILM", "ROBOTICS"]);
   const [spinning, setSpinning] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [overlay, setOverlay] = useState<"search"|"login"|"systems"|"portfolio"|null>(null);
+  const [search, setSearch] = useState("");
   const combined = useMemo(() => `${major[0]} + ${major[1]}`, [major]);
 
   function spin() {
@@ -53,8 +55,8 @@ function App() {
         <button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen} aria-controls="nav">MENU</button>
         <nav id="nav" className={menuOpen ? "open" : ""}>
           <a href="#programs">PROGRAMS</a><a href="#how">HOW IT WORKS</a><a href="#quests">QUESTS</a><a href="#about">ABOUT</a>
-          <button className="icon-button" aria-label="Search"><Search size={19}/></button>
-          <a className="login" href="#join">LOG IN</a><a className="apply" href="#join">APPLY</a>
+          <button className="icon-button" aria-label="Search" onClick={() => setOverlay("search")}><Search size={19}/></button>
+          <button className="login" onClick={() => setOverlay("login")}>LOG IN</button><a className="apply" href="#apply">APPLY</a>
         </nav>
       </header>
 
@@ -97,6 +99,15 @@ function App() {
           <Value icon={<Heart/>} title="A HAPPIER YOU" text="Curiosity looks good on you."/>
         </section>
 
+        <section id="programs" className="programs panel-frame">
+          <div className="section-heading"><div><p>// PROGRAM SELECT</p><h2>CHOOSE YOUR FIRST RUN</h2><span>One playable sequence at a time. Quality before quantity.</span></div><span>FOUNDING COHORT&nbsp; / &nbsp;18+ ONLY</span></div>
+          <div className="program-list">
+            <article><span>01</span><div><h3>PERFORMANCE + STORY</h3><p>Start with Shakespeare Battle. Decode the text, rehearse the thought, record the performance.</p></div><button onClick={openBattle}>PLAY LEVEL 1 <ArrowRight/></button></article>
+            <article><span>02</span><div><h3>CREATIVE TECHNOLOGY</h3><p>Combine storytelling, design, and AI into portfolio-ready experiments.</p></div><button onClick={() => setOverlay("portfolio")}>VIEW PATH <ArrowRight/></button></article>
+            <article><span>03</span><div><h3>SYSTEMS + ENTREPRENEURSHIP</h3><p>Learn how products, communities, incentives, and money work together.</p></div><button onClick={() => setOverlay("systems")}>VIEW PATH <ArrowRight/></button></article>
+          </div>
+        </section>
+
         <section id="how" className="skill-tree panel-frame">
           <div className="section-copy"><p>// PROGRESS</p><h2>BUILD YOUR<br/>SKILL TREE</h2><p>Combine skills from different worlds. Unlock new abilities. Become unexpectedly unstoppable.</p><a href="#programs" className="yellow-button">EXPLORE PROGRAMS <ArrowRight/></a></div>
           <div className="tree" aria-label="Connected skill tree">
@@ -113,18 +124,34 @@ function App() {
           <div className="section-heading"><div><p>// ACTIVE QUESTS</p><h2>CURRENT QUESTS</h2><span>Real challenges. Real skills. Real rewards.</span></div><span>03 ACTIVE&nbsp; / &nbsp;12 COMPLETED</span></div>
           <div className="quest-grid">
             <Quest icon={<Sparkles/>} type="MAIN QUEST" title="SHAKESPEARE BATTLE: LEVEL 1" text="Understand the thought. Respect the verse. Perform Hamlet." reward="+250 XP" onClick={openBattle}/>
-            <Quest icon={<Bot/>} type="CHALLENGE" title="EXAM BOSS: SYSTEMS THINKING" text="Solve real-world problems across disciplines." reward="+750 XP" blue/>
-            <Quest icon={<Flag/>} type="SIDE QUEST" title="BUILD YOUR PORTFOLIO" text="Create something real. Show what you can do." reward="+300 XP" yellow/>
+            <Quest icon={<Bot/>} type="CHALLENGE" title="EXAM BOSS: SYSTEMS THINKING" text="Solve real-world problems across disciplines." reward="+750 XP" blue onClick={() => setOverlay("systems")}/>
+            <Quest icon={<Flag/>} type="SIDE QUEST" title="BUILD YOUR PORTFOLIO" text="Create something real. Show what you can do." reward="+300 XP" yellow onClick={() => setOverlay("portfolio")}/>
           </div>
         </section>
 
-        <section id="join" className="checkpoint panel-frame">
+        <section id="credits" className="credits panel-frame">
+          <div className="credits-copy"><p>// THE FOUNDING MODEL</p><h2>EARN YOUR PLACE</h2><p>FUNiversity is a free-to-play learning prototype for adults. Attendance alone earns nothing. Complete quests, demonstrate mastery, and build real work.</p><strong>NO TUITION. NO CHILD ENROLLMENT. NO EMPTY CREDENTIALS.</strong></div>
+          <div className="credit-steps">
+            <article><b>01</b><GraduationCap/><h3>PLAY</h3><p>Complete a guided lesson and submit the work.</p></article>
+            <article><b>02</b><Trophy/><h3>EARN CREDITS</h3><p>Credits recognize demonstrated skills—not time spent watching lectures.</p></article>
+            <article><b>03</b><Sparkles/><h3>UNLOCK FELLOWSHIP</h3><p>Exceptional work earns consideration for the founding fellowship cohort.</p></article>
+          </div>
+        </section>
+
+        <section id="apply" className="checkpoint panel-frame">
           <div className="campus-art" aria-hidden="true">🏫</div>
-          <div><p>// FINAL CHECKPOINT</p><h2>START YOUR RUN</h2><span>Same curiosity. A more exciting future.</span><button onClick={() => document.getElementById("top")?.scrollIntoView({behavior:"smooth"})}>INSERT COIN <ArrowRight/></button></div>
+          <div><p>// FOUNDING STUDENT 001</p><h2>START YOUR RUN</h2><span>Mike tests the complete experience first. Applications open only after the pilot meets the quality bar.</span><button onClick={openBattle}>PLAY LEVEL 1 <ArrowRight/></button></div>
           <div className="manifesto"><strong>LEARN</strong><strong>CREATE</strong><strong>COMBINE</strong><strong>BELONG</strong></div>
           <div className="planet" aria-hidden="true">🪐</div>
         </section>
       </main>
+
+      {overlay && <div className="overlay" role="dialog" aria-modal="true" aria-label="FUNiversity information"><div className="overlay-card"><button className="overlay-close" onClick={() => setOverlay(null)} aria-label="Close"><X/></button>
+        {overlay === "search" && <><p>// CAMPUS SEARCH</p><h2>FIND YOUR NEXT MOVE</h2><input autoFocus value={search} onChange={e=>setSearch(e.target.value)} placeholder="Try Shakespeare, credits, programs…"/><div className="search-results">{[["PROGRAMS","#programs"],["SHAKESPEARE BATTLE","#quests"],["CREDITS + FELLOWSHIPS","#credits"],["FOUNDING STUDENT","#apply"]].filter(([name])=>name.toLowerCase().includes(search.toLowerCase())).map(([name,href])=><a key={name} href={href} onClick={()=>setOverlay(null)}>{name}<ArrowRight/></a>)}</div></>}
+        {overlay === "login" && <><p>// PILOT ACCESS</p><h2>LOGIN COMES AFTER LEVEL 1</h2><p>Founding Student 001 is testing the complete learning loop before accounts open. No fake signup form. No harvested emails. Quality first.</p><button onClick={()=>{setOverlay(null);openBattle()}}>PLAY THE PILOT <ArrowRight/></button></>}
+        {overlay === "systems" && <><p>// LOCKED QUEST</p><h2>SYSTEMS THINKING</h2><p>This Exam Boss unlocks after Shakespeare Battle Level 1. Map a real system, identify its incentives, and redesign one weak link.</p><button onClick={()=>{setOverlay(null);openBattle()}}>START WITH LEVEL 1 <ArrowRight/></button></>}
+        {overlay === "portfolio" && <><p>// SIDE QUEST</p><h2>BUILD YOUR PORTFOLIO</h2><p>Your first artifact is the performance itself: one interpreted Shakespeare passage, recorded and improved through rehearsal.</p><button onClick={()=>{setOverlay(null);openBattle()}}>CREATE ARTIFACT 001 <ArrowRight/></button></>}
+      </div></div>}
 
       <footer><a className="brand" href="#top"><strong>FUNIVERSITY</strong><span>THE DOPAMINE CAMPUS</span></a><span>KNOWLEDGE PLAYS BETTER TOGETHER.</span></footer>
     </div>
