@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Battle from "./Battle";
 import {
   ArrowRight, BookOpen, Bot, Brain, Clapperboard, Flag, Gamepad2,
@@ -20,19 +20,55 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [overlay, setOverlay] = useState<"search"|"login"|"systems"|"portfolio"|null>(null);
   const [search, setSearch] = useState("");
+  const audioContext = useRef<AudioContext | null>(null);
   const combined = useMemo(() => `${major[0]} + ${major[1]}`, [major]);
+
+  function tone(frequency: number, duration: number, delay = 0, type: OscillatorType = "square", volume = 0.045) {
+    const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const context = audioContext.current ?? new AudioContextClass();
+    audioContext.current = context;
+    if (context.state === "suspended") void context.resume();
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const start = context.currentTime + delay;
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, start);
+    gain.gain.setValueAtTime(volume, start);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start(start);
+    oscillator.stop(start + duration);
+  }
+
+  function playStartSound() {
+    tone(180, 0.08, 0, "square", 0.055);
+    tone(360, 0.11, 0.07, "square", 0.05);
+  }
+
+  function playTickSound(tick: number) {
+    tone(tick % 2 ? 240 : 190, 0.035, 0, "square", 0.025);
+  }
+
+  function playWinSound() {
+    [523, 659, 784, 1047].forEach((frequency, index) => tone(frequency, 0.18, index * 0.075, "square", 0.04));
+  }
 
   function spin() {
     if (spinning) return;
+    playStartSound();
     setSpinning(true);
     let ticks = 0;
     const timer = window.setInterval(() => {
       setMajor([leftSubjects[Math.floor(Math.random()*leftSubjects.length)], rightSubjects[Math.floor(Math.random()*rightSubjects.length)]]);
       ticks += 1;
+      playTickSound(ticks);
       if (ticks >= 11) {
         window.clearInterval(timer);
         setMajor(([a,b]) => [nextDifferent(leftSubjects,a), nextDifferent(rightSubjects,b)]);
         setSpinning(false);
+        window.setTimeout(playWinSound, 60);
       }
     }, 85);
   }
